@@ -3,6 +3,7 @@ import { AuthController } from "./controllers/AuthController";
 import { UserController } from "./controllers/UserController";
 import { AdController } from "./controllers/AdController";
 import { AuthMiddleware } from "./middlewares/AuthMiddleware";
+import { AuthValidator } from "./validators/AuthValidator";
 
 const router = express.Router();
 
@@ -11,8 +12,8 @@ router.get("/ping", (req, res) => {
 });
 
 // Auth
-router.post("/auth/login", AuthController.login);
-router.post("/auth/register", AuthController.register);
+router.post("/auth/login", AuthValidator.login, AuthController.login);
+router.post("/auth/register", AuthValidator.register, AuthController.register);
 
 // User
 router.get("/states", AuthMiddleware.private, UserController.getStates);
