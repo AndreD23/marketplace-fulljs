@@ -134,3 +134,6 @@ dist
 .vscode
 
 package-lock.json
+
+# Mongo Data
+/mongodb/mongo-data
