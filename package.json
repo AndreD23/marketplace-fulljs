@@ -10,5 +10,8 @@
     "type": "git",
     "url": "https://github.com/AndreD23/marketplace-fulljs.git"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2"
+  }
 }
