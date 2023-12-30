@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 
-import State from "../models/State";
+import { State } from "../models/State";
 import { User } from "../models/User";
-import Ad from "../models/Ad";
+import { Ad } from "../models/Ad";
 import { PipelineStage } from "mongoose";
 
 export const UserController = {

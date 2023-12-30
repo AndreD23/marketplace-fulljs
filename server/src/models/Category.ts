@@ -1,18 +1,21 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  name: String,
-  slug: String,
-  created: Date,
-  updated: Date,
+interface ICategory extends Document {
+  name: string;
+  slug: string;
+  created: Date;
+  updated: Date;
+}
+
+const CategorySchema: Schema<ICategory> = new mongoose.Schema({
+  name: { type: String },
+  slug: { type: String },
+  created: { type: Date },
+  updated: { type: Date },
 });
 
 const modelName = "Category";
 
-if (mongoose.connection && mongoose.connection.models[modelName]) {
-  module.exports = mongoose.connection.models[modelName];
-} else {
-  module.exports = mongoose.model(modelName, userSchema);
-}
-
-export default module.exports;
+export const Category =
+  mongoose.models[modelName] ||
+  mongoose.model<ICategory>(modelName, CategorySchema);

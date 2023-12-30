@@ -1,26 +1,36 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  idUser: String,
-  state: String,
-  category: String,
-  images: [Object],
-  title: String,
-  description: String,
-  price: Number,
-  priceNegotiable: Boolean,
-  views: Number,
-  status: String,
-  created: Date,
-  updated: Date,
+interface IAd extends Document {
+  idUser: string;
+  state: string;
+  category: string;
+  images: [Object];
+  title: string;
+  description: string;
+  price: number;
+  priceNegotiable: boolean;
+  views: number;
+  status: string;
+  created: Date;
+  updated: Date;
+}
+
+const AdSchema: Schema<IAd> = new mongoose.Schema({
+  idUser: { type: String },
+  state: { type: String },
+  category: { type: String },
+  images: [{ type: Object }],
+  title: { type: String },
+  description: { type: String },
+  price: { type: Number },
+  priceNegotiable: { type: Boolean },
+  views: { type: Number },
+  status: { type: String },
+  created: { type: Date },
+  updated: { type: Date },
 });
 
 const modelName = "Ad";
 
-if (mongoose.connection && mongoose.connection.models[modelName]) {
-  module.exports = mongoose.connection.models[modelName];
-} else {
-  module.exports = mongoose.model(modelName, userSchema);
-}
-
-export default module.exports;
+export const Ad =
+  mongoose.models[modelName] || mongoose.model<IAd>(modelName, AdSchema);

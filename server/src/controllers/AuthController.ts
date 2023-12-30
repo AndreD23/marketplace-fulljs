@@ -3,7 +3,7 @@ import { validationResult, matchedData } from "express-validator";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { User } from "../models/User";
-import State from "../models/State";
+import { State } from "../models/State";
 
 export const AuthController = {
   /**
