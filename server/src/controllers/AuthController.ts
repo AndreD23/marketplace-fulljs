@@ -11,8 +11,9 @@ export const AuthController = {
    *
    * @param {Request} req - The request object.
    * @param {Response} res - The response object.
+   * @returns {Promise<void>}
    */
-  login: async (req: Request, res: Response) => {
+  login: async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.json({ error: errors.mapped() });
@@ -22,7 +23,34 @@ export const AuthController = {
     // Data sanitized and validated.
     const data = matchedData(req);
 
-    res.json({ status: true, data });
+    // Check if the user exists.
+    const user = await User.findOne({
+      email: data.email,
+    });
+    if (!user) {
+      res.json({
+        error: { email: { msg: "E-mail e/ou senha incorretos" } },
+      });
+      return;
+    }
+
+    // Check if the password is correct.
+    const match = await bcrypt.compare(data.password, user.passwordHash);
+    if (!match) {
+      res.json({
+        error: { email: { msg: "E-mail e/ou senha incorretos" } },
+      });
+      return;
+    }
+
+    // Generate a token.
+    const payload = (Date.now() + Math.random()).toString();
+    const token = await bcrypt.hash(payload, 10);
+
+    // Update the user's token.
+    await User.updateOne({ _id: user._id }, { token });
+
+    res.json({ token });
   },
 
   /**
@@ -30,8 +58,9 @@ export const AuthController = {
    *
    * @param {Request} req - The request object containing user data.
    * @param {Response} res - The response object to send back the result.
+   * @returns {Promise<void>}
    */
-  register: async (req: Request, res: Response) => {
+  register: async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.json({ error: errors.mapped() });
