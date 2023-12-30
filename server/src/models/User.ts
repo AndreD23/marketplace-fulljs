@@ -1,21 +1,28 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  state: String,
-  passwordHash: String,
-  token: String,
-  created: Date,
-  updated: Date,
+interface IUser extends Document {
+  name: string;
+  email: string;
+  state: string;
+  passwordHash: string;
+  token: string;
+  role: string;
+  status: string;
+  created: Date;
+  updated: Date;
+}
+
+const UserSchema: Schema<IUser> = new mongoose.Schema({
+  name: { type: String },
+  email: { type: String },
+  state: { type: String },
+  passwordHash: { type: String },
+  token: { type: String },
+  created: { type: Date },
+  updated: { type: Date },
 });
 
 const modelName = "User";
 
-if (mongoose.connection && mongoose.connection.models[modelName]) {
-  module.exports = mongoose.connection.models[modelName];
-} else {
-  module.exports = mongoose.model(modelName, userSchema);
-}
-
-export default module.exports;
+export const User =
+  mongoose.models[modelName] || mongoose.model<IUser>(modelName, UserSchema);

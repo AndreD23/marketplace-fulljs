@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 
 import State from "../models/State";
-import User from "../models/User";
-import Category from "../models/Category";
+import { User } from "../models/User";
 import Ad from "../models/Ad";
 import { PipelineStage } from "mongoose";
 
@@ -12,10 +11,8 @@ export const UserController = {
     res.json({ states });
   },
   info: async (req: Request, res: Response) => {
-    console.log(req);
-
     const token = req.query.token ? req.query.token : req.body.token;
-    const user = await User.findOne({ token }, "-password -__v");
+    const user = await User.findOne({ token }, "-passwordHash -token -__v");
     const state = await State.findById(user.state);
 
     // Search Ad with aggregate of categories
@@ -56,9 +53,10 @@ export const UserController = {
     const ads = await Ad.aggregate(request).exec();
 
     res.json({
-      name: user.name,
-      email: user.email,
-      state: state.name,
+      user: {
+        ...user.toJSON(),
+        state: state.name,
+      },
       ads,
     });
   },
