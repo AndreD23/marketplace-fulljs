@@ -6,6 +6,8 @@ import { Category, ICategory } from "../models/Category";
 import { User } from "../models/User";
 import { Ad, AdImage } from "../models/Ad";
 import { matchedData, validationResult } from "express-validator";
+import mongoose, { PipelineStage } from "mongoose";
+import { ObjectId } from "mongodb";
 
 const addImage = async (buffer: Buffer, categorySlug: string) => {
   const newName = `${uuid()}.jpg`;
@@ -22,6 +24,13 @@ const addImage = async (buffer: Buffer, categorySlug: string) => {
 };
 
 const validMimeTypes = ["image/jpeg", "image/jpg", "image/png"];
+
+interface AdFilters {
+  status: boolean;
+  title?: { $regex: string; $options: string };
+  idCategory?: mongoose.Types.ObjectId;
+  idState?: mongoose.Types.ObjectId;
+}
 
 export const AdController = {
   /**
@@ -59,8 +68,10 @@ export const AdController = {
 
     const matchedBody = matchedData(req);
 
-    let { title, price, priceNegotiable, description, idCategory, token } =
+    let { title, price, priceNegotiable, description, idCategory } =
       matchedBody;
+
+    const token = req.query.token ? req.query.token : req.body.token;
 
     const user = await User.findOne({ token }).exec();
 
@@ -115,7 +126,7 @@ export const AdController = {
 
     const newAd = await Ad.create({
       idUser: user._id,
-      state: user.state,
+      idState: user.state,
       idCategory: idCategory,
       images: adImages,
       title,
@@ -129,7 +140,139 @@ export const AdController = {
 
     res.json({ id: newAd._id });
   },
-  getList: async (req: Request, res: Response) => {},
+
+  /**
+   * Retrieves a list of ads based on the provided filters.
+   *
+   * @param {Request} req - The request object.
+   * @param {Response} res - The response object.
+   * @returns {void}
+   */
+  getList: async (req: Request, res: Response): Promise<void> => {
+    const { sort, limit = 8, offset = 0, q, idCategory, idState } = req.query;
+    const filters: AdFilters = { status: true };
+
+    const order = sort === "desc" ? -1 : 1;
+
+    if (q) {
+      filters.title = { $regex: q.toString(), $options: "i" };
+    }
+
+    if (idCategory) {
+      if (!mongoose.Types.ObjectId.isValid(idCategory.toString())) {
+        res.json({
+          error: { state: { msg: "Código de categoria inválida" } },
+        });
+        return;
+      }
+
+      filters.idCategory = new ObjectId(idCategory.toString());
+    }
+
+    const request: PipelineStage[] = [
+      {
+        $match: filters,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "adOwner",
+        },
+      },
+      {
+        $unwind: "$adOwner",
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "idCategory",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: "$category",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          price: { $first: "$price" },
+          priceNegotiable: { $first: "$priceNegotiable" },
+          description: { $first: "$description" },
+          views: { $first: "$views" },
+          status: { $first: "$status" },
+          idCategory: { $first: "$idCategory" },
+          idUser: { $first: "$idUser" },
+          category: { $first: "$category.slug" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          adOwner: { $first: "$adOwner" },
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          price: 1,
+          priceNegotiable: 1,
+          description: 1,
+          views: 1,
+          status: 1,
+          idCategory: 1,
+          idUser: 1,
+          category: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          adOwner: {
+            name: "$adOwner.name",
+            email: "$adOwner.email",
+            idState: "$adOwner.idState",
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: order,
+        },
+      },
+    ];
+
+    if (idState) {
+      if (!mongoose.Types.ObjectId.isValid(idState.toString())) {
+        res.json({
+          error: { state: { msg: "Código de estado inválido" } },
+        });
+        return;
+      }
+
+      request.push({
+        $match: {
+          "adOwner.idState": new ObjectId(idState.toString()),
+        },
+      });
+    }
+
+    const requestCount: PipelineStage[] = [...request];
+    requestCount.push({
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+      },
+    });
+
+    const adsTotal = await Ad.aggregate(requestCount).exec();
+    const total = adsTotal[0]?.total || 0;
+
+    const adsData = await Ad.aggregate(request)
+      .skip(Number(offset))
+      .limit(Number(limit))
+      .exec();
+
+    res.json({ total, data: adsData });
+  },
+
   getItem: async (req: Request, res: Response) => {},
   edit: async (req: Request, res: Response) => {},
 };
