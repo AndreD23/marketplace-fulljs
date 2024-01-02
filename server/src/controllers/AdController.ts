@@ -324,7 +324,7 @@ export const AdController = {
       return;
     }
 
-    const ad = await Ad.findById(id).exec();
+    const ad = await Ad.findById(id).select("-__v").exec();
 
     if (!ad) {
       res.json({ error: "Anúncio inexistente" });
@@ -367,13 +367,28 @@ export const AdController = {
 
     adData.state = state;
 
+    // Get other ads from the same user
     if (other) {
       adData.otherAds = await Ad.find({
         idUser: adData.idUser,
         _id: { $ne: adData._id },
       })
+        .select("title images price priceNegotiable")
         .limit(3)
         .exec();
+
+      adData.otherAds = adData.otherAds.map((ad: any) => {
+        ad = ad.toObject();
+
+        ad.images = ad.images.map((image: AdImage) => ({
+          ...image,
+          url: `${BASE}/${image.url}`,
+        }));
+
+        ad.defaultImg = ad.images.find((image: AdImage) => image.default);
+
+        return ad;
+      });
     }
 
     res.json({ data: adData });
