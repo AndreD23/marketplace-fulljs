@@ -36,7 +36,7 @@ router.post(
   AdController.add,
 );
 router.get("/ad/list", AdController.getList);
-router.get("/ad/item", AdController.getItem);
+router.get("/ad/:id", AdController.getItem);
 router.post("/ad/:id", AuthMiddleware.private, AdController.edit);
 
 export default router;

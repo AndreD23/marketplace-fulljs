@@ -9,6 +9,7 @@ import { matchedData, validationResult } from "express-validator";
 import mongoose, { PipelineStage } from "mongoose";
 import { ObjectId } from "mongodb";
 import { BASE } from "../config";
+import { State } from "../models/State";
 
 const addImage = async (buffer: Buffer, categorySlug: string) => {
   const newName = `${uuid()}.jpg`;
@@ -308,6 +309,75 @@ export const AdController = {
     res.json({ total, data: adsData });
   },
 
-  getItem: async (req: Request, res: Response) => {},
+  /**
+   * Retrieves an item by its ID and returns its data.
+   *
+   * @param {Request} req - The express request object.
+   * @param {Response} res - The express response object.
+   */
+  getItem: async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { other = null } = req.query;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.json({ error: "Anúncio inexistente" });
+      return;
+    }
+
+    const ad = await Ad.findById(id).exec();
+
+    if (!ad) {
+      res.json({ error: "Anúncio inexistente" });
+      return;
+    }
+
+    ad.views++;
+    await ad.save();
+
+    const adData = ad.toObject();
+
+    adData.images = adData.images.map((image: AdImage) => ({
+      ...image,
+      url: `${BASE}/${image.url}`,
+    }));
+
+    const user = await User.findById(adData.idUser)
+      .select("name email idState")
+      .exec();
+    if (!user) {
+      res.json({ error: "Usuário inexistente" });
+      return;
+    }
+
+    adData.user = user;
+
+    const category = await Category.findById(adData.idCategory).exec();
+    if (!category) {
+      res.json({ error: "Categoria inexistente" });
+      return;
+    }
+
+    adData.category = category;
+
+    const state = await State.findById(user.idState).exec();
+    if (!state) {
+      res.json({ error: "Estado inexistente" });
+      return;
+    }
+
+    adData.state = state;
+
+    if (other) {
+      adData.otherAds = await Ad.find({
+        idUser: adData.idUser,
+        _id: { $ne: adData._id },
+      })
+        .limit(3)
+        .exec();
+    }
+
+    res.json({ data: adData });
+  },
+
   edit: async (req: Request, res: Response) => {},
 };
