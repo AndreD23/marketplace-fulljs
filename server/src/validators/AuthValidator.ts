@@ -42,7 +42,7 @@ export const AuthValidator = {
       },
       errorMessage: "Senha precisa ter pelo menos 6 caracteres",
     },
-    state: {
+    idState: {
       notEmpty: true,
       isMongoId: true,
       errorMessage: "Estado não preenchido",

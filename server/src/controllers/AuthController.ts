@@ -82,7 +82,7 @@ export const AuthController = {
     }
 
     // Check if the state is a valid ObjectId.
-    if (!mongoose.Types.ObjectId.isValid(data.state)) {
+    if (!mongoose.Types.ObjectId.isValid(data.idState)) {
       res.json({
         error: { state: { msg: "Código de estado inválido" } },
       });
@@ -90,7 +90,7 @@ export const AuthController = {
     }
 
     // Check if the state exists.
-    const state = await State.findById(data.state);
+    const state = await State.findById(data.idState);
     if (!state) {
       res.json({
         error: { state: { msg: "Estado não existe" } },
@@ -112,11 +112,13 @@ export const AuthController = {
         email: data.email,
         passwordHash,
         token,
-        state: data.state,
+        idState: data.idState,
       });
     } catch (e) {
       res.json({
-        error: { state: { msg: "Erro ao criar usuário" } },
+        error: {
+          msg: "Ocorreu um erro, por favor tente novamente mais tarde.",
+        }
       });
       return;
     }
