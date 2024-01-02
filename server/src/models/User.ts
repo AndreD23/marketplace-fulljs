@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 interface IUser extends Document {
   name: string;
   email: string;
-  state: string;
+  idState: string;
   passwordHash: string;
   token: string;
   role: string;
@@ -15,7 +15,7 @@ interface IUser extends Document {
 const UserSchema: Schema<IUser> = new mongoose.Schema({
   name: { type: String },
   email: { type: String },
-  state: { type: String },
+  idState: { type: String },
   passwordHash: { type: String },
   token: { type: String },
   createdAt: { type: Date },

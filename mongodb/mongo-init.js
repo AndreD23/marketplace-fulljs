@@ -140,7 +140,7 @@ db.users.insertMany([
   {
     "name": "André Dorneles",
     "email": "andre@imperiosoft.com.br",
-    "state": sp._id,
+    "idState": sp._id,
     "passwordHash": "$2b$10$CMq6dKzWACOPQMfDK60lreFkm9h.roD1EMyMk6FcAD9MiyFUm6cZO",
     "role": "admin",
     "status": "active",
@@ -148,7 +148,7 @@ db.users.insertMany([
   {
     "name": "Usuário Teste",
     "email": "user@example.com",
-    "state": sp._id,
+    "idState": sp._id,
     "passwordHash": "$2b$10$CMq6dKzWACOPQMfDK60lreFkm9h.roD1EMyMk6FcAD9MiyFUm6cZO",
     "role": "admin",
     "status": "active",

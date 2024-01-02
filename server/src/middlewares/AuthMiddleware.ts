@@ -21,7 +21,7 @@ export const AuthMiddleware = {
 
     const token = req.query.token ? req.query.token : req.body.token;
 
-    if (token === "") {
+    if (!token || token === "") {
       res.json({ notallowed: true });
       return;
     }

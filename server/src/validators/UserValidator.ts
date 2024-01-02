@@ -25,7 +25,7 @@ export const UserValidator = {
       },
       errorMessage: "Senha inválida",
     },
-    state: {
+    idState: {
       optional: true,
       errorMessage: "Estado não preenchido",
     },

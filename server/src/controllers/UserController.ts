@@ -7,6 +7,13 @@ import mongoose, { PipelineStage } from "mongoose";
 import { matchedData, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 
+interface EditMeBody {
+  name?: string;
+  email?: string;
+  idState?: string;
+  passwordHash?: string;
+}
+
 export const UserController = {
   getStates: async (req: Request, res: Response) => {
     const states = await State.find();
@@ -22,7 +29,7 @@ export const UserController = {
   info: async (req: Request, res: Response): Promise<void> => {
     const token = req.query.token ? req.query.token : req.body.token;
     const user = await User.findOne({ token }, "-passwordHash -token -__v");
-    const state = await State.findById(user.state);
+    const state = await State.findById(user.idState);
 
     // Search Ad with aggregate of categories
     const request: PipelineStage[] = [
@@ -86,9 +93,11 @@ export const UserController = {
 
     const matchedBody = matchedData(req);
 
-    const { name, email, state, password, token } = matchedBody;
+    const { name, email, idState, password } = matchedBody;
 
-    const data: any = {};
+    const token = req.query.token ? req.query.token : req.body.token;
+
+    const data: EditMeBody = {};
 
     if (name) data.name = name;
 
@@ -107,9 +116,9 @@ export const UserController = {
       data.email = email;
     }
 
-    if (state) {
+    if (idState) {
       // Check if the state is a valid ObjectId.
-      if (!mongoose.Types.ObjectId.isValid(state)) {
+      if (!mongoose.Types.ObjectId.isValid(idState)) {
         res.json({
           error: { state: { msg: "Código de estado inválido" } },
         });
@@ -117,7 +126,7 @@ export const UserController = {
       }
 
       // Check if the state exists.
-      const stateCheck = await State.findById(state);
+      const stateCheck = await State.findById(idState).exec();
       if (!stateCheck) {
         res.json({
           error: { state: { msg: "Estado não existe" } },
@@ -125,13 +134,16 @@ export const UserController = {
         return;
       }
 
-      data.state = state;
+      data.idState = idState;
     }
 
     if (password) {
       // Hash the password.
       data.passwordHash = await bcrypt.hash(password, 10);
     }
+
+    const userTest = await User.find({ token: token }).exec();
+    console.log(userTest)
 
     try {
       await User.findOneAndUpdate({ token }, data);
