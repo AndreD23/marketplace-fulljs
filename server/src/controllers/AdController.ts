@@ -11,7 +11,7 @@ import { ObjectId } from "mongodb";
 import { BASE } from "../config";
 import { State } from "../models/State";
 
-const addImage = async (buffer: Buffer, categorySlug: string) => {
+const addImage = async (buffer: Buffer) => {
   const newName = `${uuid()}.jpg`;
   const year = new Date().getFullYear().toString();
   let month = (new Date().getMonth() + 1).toString();
@@ -19,7 +19,7 @@ const addImage = async (buffer: Buffer, categorySlug: string) => {
   if (month.length === 1) {
     month = `0${month}`;
   }
-  const path = `uploads/images/${categorySlug}/${year}/${month}/${newName}`;
+  const path = `uploads/images/products/${year}/${month}/${newName}`;
   const tmpImg = await jimp.read(buffer);
   tmpImg.cover(500, 500).quality(90).write(`./public/${path}`);
   return path;
@@ -103,7 +103,7 @@ export const AdController = {
           return;
         }
 
-        const url = await addImage(images.data, category.slug);
+        const url = await addImage(images.data);
         adImages.push({ url, default: false });
       }
 
@@ -116,7 +116,7 @@ export const AdController = {
             return;
           }
 
-          const url = await addImage(image.data, category.slug);
+          const url = await addImage(image.data);
           adImages.push({ url, default: false });
         }
       }
@@ -134,7 +134,7 @@ export const AdController = {
       title,
       description: description || "",
       price,
-      priceNegotiable: priceNegotiable ? Boolean(priceNegotiable) : false,
+      priceNegotiable: priceNegotiable || false,
       views: 0,
       status: true,
       createdAt: new Date(),
@@ -394,5 +394,106 @@ export const AdController = {
     res.json({ data: adData });
   },
 
-  edit: async (req: Request, res: Response) => {},
+  /**
+   * Edit an advertisement
+   * @param {Request} req - The request object
+   * @param {Response} res - The response object
+   * @returns {Promise<void>} - The edited advertisement or error message
+   */
+  edit: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const {
+      title,
+      status,
+      price,
+      priceNegotiable,
+      description,
+      idCategory,
+      token,
+    } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.json({ error: "Anúncio inexistente" });
+      return;
+    }
+
+    const ad = await Ad.findById(id).exec();
+    const user = await User.findOne({ token }).exec();
+    if (!ad || !user || user._id.toString() !== ad.idUser.toString()) {
+      res.json({ error: "Anúncio inexistente" });
+      return;
+    }
+
+    if (title) {
+      ad.title = title;
+    }
+
+    if (status) {
+      ad.status = status;
+    }
+
+    if (price) {
+      ad.price = price;
+    }
+
+    if (priceNegotiable) {
+      ad.priceNegotiable = priceNegotiable;
+    }
+
+    if (description) {
+      ad.description = description;
+    }
+
+    if (idCategory) {
+      const category = await Category.findById(idCategory).exec();
+      if (!category) {
+        res.json({ error: "Categoria inexistente" });
+        return;
+      }
+
+      ad.idCategory = idCategory;
+    }
+
+    const images = req.files?.images;
+
+    console.log(images);
+
+    if (images) {
+      const newImages: AdImage[] = [];
+      // Single image
+      if (!Array.isArray(images)) {
+        // Check mime type
+        if (!validMimeTypes.includes(images.mimetype)) {
+          res.json({ error: "Arquivo não suportado" });
+          return;
+        }
+
+        const url = await addImage(images.data);
+        newImages.push({ url, default: false });
+      }
+
+      // Multiple images
+      if (Array.isArray(images)) {
+        for (const image of images) {
+          // Check mime type
+          if (!validMimeTypes.includes(image.mimetype)) {
+            res.json({ error: "Arquivo não suportado" });
+            return;
+          }
+
+          const url = await addImage(image.data);
+          newImages.push({ url, default: false });
+        }
+      }
+
+      ad.images = [
+        ...ad.images,
+        ...newImages.filter((image) => !ad.images.includes(image)),
+      ];
+    }
+
+    await ad.save();
+
+    res.json({ success: true });
+  },
 };
