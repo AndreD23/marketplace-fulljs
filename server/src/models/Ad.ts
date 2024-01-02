@@ -1,24 +1,29 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-interface IAd extends Document {
+export interface AdImage {
+  url: string;
+  default: boolean;
+}
+
+export interface IAd extends Document {
   idUser: string;
   state: string;
-  category: string;
-  images: [Object];
+  idCategory: string;
+  images: [AdImage];
   title: string;
   description: string;
   price: number;
   priceNegotiable: boolean;
   views: number;
   status: string;
-  created: Date;
-  updated: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const AdSchema: Schema<IAd> = new mongoose.Schema({
   idUser: { type: String },
   state: { type: String },
-  category: { type: String },
+  idCategory: { type: String },
   images: [{ type: Object }],
   title: { type: String },
   description: { type: String },
@@ -26,8 +31,8 @@ const AdSchema: Schema<IAd> = new mongoose.Schema({
   priceNegotiable: { type: Boolean },
   views: { type: Number },
   status: { type: String },
-  created: { type: Date },
-  updated: { type: Date },
+  createdAt: { type: Date },
+  updatedAt: { type: Date },
 });
 
 const modelName = "Ad";

@@ -2,10 +2,6 @@ import { checkSchema } from "express-validator";
 
 export const UserValidator = {
   edit: checkSchema({
-    token: {
-      notEmpty: true,
-      errorMessage: "Token inválido",
-    },
     name: {
       optional: true,
       trim: true,

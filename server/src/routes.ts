@@ -5,6 +5,7 @@ import { AdController } from "./controllers/AdController";
 import { AuthMiddleware } from "./middlewares/AuthMiddleware";
 import { AuthValidator } from "./validators/AuthValidator";
 import { UserValidator } from "./validators/UserValidator";
+import { AdValidator } from "./validators/AdValidator";
 
 const router = express.Router();
 
@@ -21,14 +22,19 @@ router.get("/states", AuthMiddleware.private, UserController.getStates);
 router.get("/user/me", AuthMiddleware.private, UserController.info);
 router.put(
   "/user/me",
-  UserValidator.edit,
   AuthMiddleware.private,
+  UserValidator.edit,
   UserController.editMe,
 );
 
 // Ads
 router.get("/ad/categories", AdController.getCategories);
-router.post("/ad/add", AuthMiddleware.private, AdController.add);
+router.post(
+  "/ad/add",
+  AuthMiddleware.private,
+  AdValidator.add,
+  AdController.add,
+);
 router.get("/ad/list", AdController.getList);
 router.get("/ad/item", AdController.getItem);
 router.post("/ad/:id", AuthMiddleware.private, AdController.edit);

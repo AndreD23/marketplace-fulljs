@@ -154,3 +154,28 @@ db.users.insertMany([
     "status": "active",
   }
 ])
+
+db.createCollection('categories')
+
+db.categories.insertMany([
+  {
+    "name":"Bebês",
+    "slug":"baby"
+  },
+  {
+    "name":"Carros",
+    "slug":"cars"
+  },
+  {
+    "name":"Roupas",
+    "slug":"clouther"
+  },
+  {
+    "name":"Eletrônicos",
+    "slug":"electronics"
+  },
+  {
+    "name":"Esportes",
+    "slug":"sports"
+  }
+])

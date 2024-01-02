@@ -44,6 +44,7 @@ export const AuthValidator = {
     },
     state: {
       notEmpty: true,
+      isMongoId: true,
       errorMessage: "Estado não preenchido",
     },
   }),

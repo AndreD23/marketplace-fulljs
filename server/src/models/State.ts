@@ -2,14 +2,14 @@ import mongoose, { Schema, Document } from "mongoose";
 
 interface IState extends Document {
   name: string;
-  created: Date;
-  updated: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const StateSchema: Schema<IState> = new mongoose.Schema({
   name: { type: String },
-  created: { type: Date },
-  updated: { type: Date },
+  createdAt: { type: Date },
+  updatedAt: { type: Date },
 });
 
 const modelName = "State";

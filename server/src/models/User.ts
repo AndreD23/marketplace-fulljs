@@ -8,8 +8,8 @@ interface IUser extends Document {
   token: string;
   role: string;
   status: string;
-  created: Date;
-  updated: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({
@@ -18,8 +18,8 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
   state: { type: String },
   passwordHash: { type: String },
   token: { type: String },
-  created: { type: Date },
-  updated: { type: Date },
+  createdAt: { type: Date },
+  updatedAt: { type: Date },
 });
 
 const modelName = "User";
