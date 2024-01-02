@@ -8,6 +8,7 @@ import { Ad, AdImage } from "../models/Ad";
 import { matchedData, validationResult } from "express-validator";
 import mongoose, { PipelineStage } from "mongoose";
 import { ObjectId } from "mongodb";
+import { BASE } from "../config";
 
 const addImage = async (buffer: Buffer, categorySlug: string) => {
   const newName = `${uuid()}.jpg`;
@@ -46,7 +47,7 @@ export const AdController = {
       const c = cats[i].toObject();
       categories.push({
         ...c,
-        img: `${process.env.BASE_URL}/uploads/images/${c.slug}/${c.slug}.png`,
+        img: `${BASE}/uploads/images/${c.slug}/${c.slug}.png`,
       });
     }
 
@@ -210,6 +211,7 @@ export const AdController = {
           createdAt: { $first: "$createdAt" },
           updatedAt: { $first: "$updatedAt" },
           adOwner: { $first: "$adOwner" },
+          images: { $first: "$images" },
         },
       },
       {
@@ -229,6 +231,39 @@ export const AdController = {
             name: "$adOwner.name",
             email: "$adOwner.email",
             idState: "$adOwner.idState",
+          },
+          images: {
+            $map: {
+              input: "$images",
+              as: "image",
+              in: {
+                url: {
+                  $concat: [BASE, "/", "$$image.url"],
+                },
+                default: "$$image.default",
+              },
+            },
+          },
+          defaultImg: {
+            $arrayElemAt: [
+              {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$images",
+                      as: "img",
+                      cond: { $eq: ["$$img.default", true] },
+                    },
+                  },
+                  as: "img",
+                  in: {
+                    url: { $concat: [BASE, "/", "$$img.url"] },
+                    default: "$$img.default",
+                  },
+                },
+              },
+              0,
+            ],
           },
         },
       },

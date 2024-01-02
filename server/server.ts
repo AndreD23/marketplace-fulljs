@@ -7,6 +7,7 @@ import cors = require("cors");
 import fileupload = require("express-fileupload");
 
 import routes from "./src/routes";
+import { BASE, PORT } from "./src/config";
 
 if (typeof process.env.DATABASE_URL === "undefined") {
   throw new Error("DATABASE_URL is undefined");
@@ -27,8 +28,6 @@ app.use(express.static(__dirname + "/public"));
 
 app.use(routes);
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server listening on ${BASE}`);
 });
