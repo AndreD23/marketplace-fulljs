@@ -64,7 +64,7 @@ export const AdController = {
   add: async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({ error: errors.mapped() });
+      res.status(400).json({ error: errors.mapped() });
       return;
     }
 
@@ -73,18 +73,18 @@ export const AdController = {
     let { title, price, priceNegotiable, description, idCategory } =
       matchedBody;
 
-    const token = req.query.token ? req.query.token : req.body.token;
+    const token = req.body.token;
 
     const user = await User.findOne({ token }).exec();
 
     if (!user) {
-      res.json({ error: "Token inválido" });
+      res.status(404).json({ error: "Token inválido" });
       return;
     }
 
     const category: ICategory = await Category.findById(idCategory).exec();
     if (!category) {
-      res.json({ error: "Categoria inexistente" });
+      res.status(404).json({ error: "Categoria inexistente" });
       return;
     }
 
@@ -99,7 +99,7 @@ export const AdController = {
       if (!Array.isArray(images)) {
         // Check mime type
         if (!validMimeTypes.includes(images.mimetype)) {
-          res.json({ error: "Arquivo não suportado" });
+          res.status(400).json({ error: "Arquivo não suportado" });
           return;
         }
 
@@ -112,7 +112,7 @@ export const AdController = {
         for (const image of images) {
           // Check mime type
           if (!validMimeTypes.includes(image.mimetype)) {
-            res.json({ error: "Arquivo não suportado" });
+            res.status(400).json({ error: "Arquivo não suportado" });
             return;
           }
 
@@ -162,7 +162,7 @@ export const AdController = {
 
     if (idCategory) {
       if (!mongoose.Types.ObjectId.isValid(idCategory.toString())) {
-        res.json({
+        res.status(400).json({
           error: { state: { msg: "Código de categoria inválida" } },
         });
         return;
@@ -327,7 +327,7 @@ export const AdController = {
     const ad = await Ad.findById(id).select("-__v").exec();
 
     if (!ad) {
-      res.json({ error: "Anúncio inexistente" });
+      res.status(404).json({ error: "Anúncio inexistente" });
       return;
     }
 
@@ -353,7 +353,7 @@ export const AdController = {
 
     const category = await Category.findById(adData.idCategory).exec();
     if (!category) {
-      res.json({ error: "Categoria inexistente" });
+      res.status(404).json({ error: "Categoria inexistente" });
       return;
     }
 
@@ -361,7 +361,7 @@ export const AdController = {
 
     const state = await State.findById(user.idState).exec();
     if (!state) {
-      res.json({ error: "Estado inexistente" });
+      res.status(404).json({ error: "Estado inexistente" });
       return;
     }
 
@@ -413,14 +413,14 @@ export const AdController = {
     } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      res.json({ error: "Anúncio inexistente" });
+      res.status(404).json({ error: "Anúncio inexistente" });
       return;
     }
 
     const ad = await Ad.findById(id).exec();
     const user = await User.findOne({ token }).exec();
     if (!ad || !user || user._id.toString() !== ad.idUser.toString()) {
-      res.json({ error: "Anúncio inexistente" });
+      res.status(404).json({ error: "Anúncio inexistente" });
       return;
     }
 
@@ -447,7 +447,7 @@ export const AdController = {
     if (idCategory) {
       const category = await Category.findById(idCategory).exec();
       if (!category) {
-        res.json({ error: "Categoria inexistente" });
+        res.status(404).json({ error: "Categoria inexistente" });
         return;
       }
 
@@ -456,15 +456,13 @@ export const AdController = {
 
     const images = req.files?.images;
 
-    console.log(images);
-
     if (images) {
       const newImages: AdImage[] = [];
       // Single image
       if (!Array.isArray(images)) {
         // Check mime type
         if (!validMimeTypes.includes(images.mimetype)) {
-          res.json({ error: "Arquivo não suportado" });
+          res.status(400).json({ error: "Arquivo não suportado" });
           return;
         }
 
@@ -477,7 +475,7 @@ export const AdController = {
         for (const image of images) {
           // Check mime type
           if (!validMimeTypes.includes(image.mimetype)) {
-            res.json({ error: "Arquivo não suportado" });
+            res.status(400).json({ error: "Arquivo não suportado" });
             return;
           }
 

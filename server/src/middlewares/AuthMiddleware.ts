@@ -14,21 +14,28 @@ export const AuthMiddleware = {
    * @param {NextFunction} next - The Express NextFunction object.
    */
   private: async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.query.token && !req.body.token) {
-      res.json({ notallowed: true });
+    const bearerHeader = req.headers.authorization;
+    if (!bearerHeader) {
+      res.status(403).json({ notallowed: true });
       return;
     }
 
-    const token = req.query.token ? req.query.token : req.body.token;
+    const bearer = bearerHeader.split(" ");
+    if (bearer.length !== 2 || bearer[0] !== "Bearer") {
+      res.status(403).json({ notallowed: true });
+      return;
+    }
+
+    const token = req.body.token;
 
     if (!token || token === "") {
-      res.json({ notallowed: true });
+      res.status(403).json({ notallowed: true });
       return;
     }
 
     const user = await User.findOne({ token });
     if (!user) {
-      res.json({ notallowed: true });
+      res.status(403).json({ notallowed: true });
       return;
     }
 

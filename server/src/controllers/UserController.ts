@@ -27,7 +27,7 @@ export const UserController = {
    * @returns {Promise<void>}
    */
   info: async (req: Request, res: Response): Promise<void> => {
-    const token = req.query.token ? req.query.token : req.body.token;
+    const token = req.body.token;
     const user = await User.findOne({ token }, "-passwordHash -token -__v");
     const state = await State.findById(user.idState);
 
@@ -87,7 +87,7 @@ export const UserController = {
   editMe: async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({ error: errors.mapped() });
+      res.status(400).json({ error: errors.mapped() });
       return;
     }
 
@@ -95,7 +95,7 @@ export const UserController = {
 
     const { name, email, idState, password } = matchedBody;
 
-    const token = req.query.token ? req.query.token : req.body.token;
+    const token = req.body.token;
 
     const data: EditMeBody = {};
 
@@ -119,7 +119,7 @@ export const UserController = {
     if (idState) {
       // Check if the state is a valid ObjectId.
       if (!mongoose.Types.ObjectId.isValid(idState)) {
-        res.json({
+        res.status(400).json({
           error: { state: { msg: "Código de estado inválido" } },
         });
         return;
@@ -128,7 +128,7 @@ export const UserController = {
       // Check if the state exists.
       const stateCheck = await State.findById(idState).exec();
       if (!stateCheck) {
-        res.json({
+        res.status(404).json({
           error: { state: { msg: "Estado não existe" } },
         });
         return;
@@ -142,13 +142,12 @@ export const UserController = {
       data.passwordHash = await bcrypt.hash(password, 10);
     }
 
-    const userTest = await User.find({ token: token }).exec();
-    console.log(userTest)
-
     try {
       await User.findOneAndUpdate({ token }, data);
     } catch (e) {
-      res.json({ error: "Ocorreu um erro ao atualizar o usuário." });
+      res
+        .status(400)
+        .json({ error: "Ocorreu um erro ao atualizar o usuário." });
       return;
     }
 

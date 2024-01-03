@@ -16,7 +16,7 @@ export const AuthController = {
   login: async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({ error: errors.mapped() });
+      res.status(400).json({ error: errors.mapped() });
       return;
     }
 
@@ -28,16 +28,14 @@ export const AuthController = {
       email: data.email,
     });
     if (!user) {
-      res.json({
-        error: { email: { msg: "E-mail e/ou senha incorretos" } },
-      });
+      res.status(403).json({ error: "E-mail e/ou senha incorretos" });
       return;
     }
 
     // Check if the password is correct.
     const match = await bcrypt.compare(data.password, user.passwordHash);
     if (!match) {
-      res.json({
+      res.status(403).json({
         error: { email: { msg: "E-mail e/ou senha incorretos" } },
       });
       return;
@@ -63,7 +61,7 @@ export const AuthController = {
   register: async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({ error: errors.mapped() });
+      res.status(400).json({ error: errors.mapped() });
       return;
     }
 
@@ -75,7 +73,7 @@ export const AuthController = {
       email: data.email,
     });
     if (anotherUser) {
-      res.json({
+      res.status(400).json({
         error: { email: { msg: "E-mail já existe" } },
       });
       return;
@@ -83,7 +81,7 @@ export const AuthController = {
 
     // Check if the state is a valid ObjectId.
     if (!mongoose.Types.ObjectId.isValid(data.idState)) {
-      res.json({
+      res.status(400).json({
         error: { state: { msg: "Código de estado inválido" } },
       });
       return;
@@ -92,7 +90,7 @@ export const AuthController = {
     // Check if the state exists.
     const state = await State.findById(data.idState);
     if (!state) {
-      res.json({
+      res.status(404).json({
         error: { state: { msg: "Estado não existe" } },
       });
       return;
@@ -115,10 +113,10 @@ export const AuthController = {
         idState: data.idState,
       });
     } catch (e) {
-      res.json({
+      res.status(400).json({
         error: {
-          msg: "Ocorreu um erro, por favor tente novamente mais tarde.",
-        }
+          message: "Ocorreu um erro, por favor tente novamente mais tarde.",
+        },
       });
       return;
     }
