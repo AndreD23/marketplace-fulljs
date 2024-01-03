@@ -1,7 +1,5 @@
 import styled from "styled-components";
 
-export const PageArea = styled.div``;
-
 export const SearchArea = styled.div`
   background-color: #ddd;
   border-bottom: 1px solid #ccc;
@@ -75,5 +73,28 @@ export const SearchArea = styled.div`
         margin-right: 10px;
       }
     }
+  }
+`;
+
+export const PageArea = styled.div`
+  h2 {
+    font-size: 20px;
+  }
+
+  .list {
+    display: flex;
+    flex-wrap: wrap;
+
+    .aditem {
+      width: 25%;
+    }
+  }
+
+  .seeAllLink {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 10px;
   }
 `;
