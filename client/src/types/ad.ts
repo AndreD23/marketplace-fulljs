@@ -1,3 +1,6 @@
+import { IState } from "./state";
+import { ICategory } from "./category";
+
 export interface AdImage {
   url: string;
   default: boolean;
@@ -18,11 +21,14 @@ export interface IAd {
   views: number;
   status: boolean;
   idCategory: string;
-  category: string;
+  category: ICategory;
   createdAt: Date;
   updatedAt: Date;
   idState: string;
   adOwner: IAdOwner;
   images: [AdImage];
   defaultImg: AdImage;
+  otherAds: [IAd];
+  user: IAdOwner;
+  state: IState;
 }

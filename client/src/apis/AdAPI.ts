@@ -13,13 +13,13 @@ interface CategoriesReturnData {
   error?: string;
 }
 
-interface RecentAdsReturnData {
+interface GetAdsReturnData {
   ads: IAd[];
   total?: number;
   error?: string;
 }
 
-interface GetRecentAdsResultData {
+interface GetAdListResultData {
   total: number;
   data: IAd[];
   error?: string;
@@ -32,6 +32,16 @@ interface GetAdsOptions {
   q?: string;
   cat?: string;
   state?: string;
+}
+
+interface GetAdReturnData {
+  ad?: IAd;
+  error?: string;
+}
+
+interface GetAdItemResultData {
+  data: IAd;
+  error?: string;
 }
 
 export const AdAPI = {
@@ -74,16 +84,13 @@ export const AdAPI = {
    * Retrieves a list of recent ads based on the specified options.
    *
    * @param {GetAdsOptions} options - The options to customize the query. Optional.
-   * @returns {Promise<RecentAdsReturnData>} - A promise that resolves to an object containing the ads and total count.
+   * @returns {Promise<GetAdsReturnData>} - A promise that resolves to an object containing the ads and total count.
    */
-  getAds: async (options?: GetAdsOptions): Promise<RecentAdsReturnData> => {
+  getAds: async (options?: GetAdsOptions): Promise<GetAdsReturnData> => {
     try {
-      const response = await ApiGateway.get<GetRecentAdsResultData>(
-        "/ad/list",
-        {
-          params: options,
-        },
-      );
+      const response = await ApiGateway.get<GetAdListResultData>("/ad/list", {
+        params: options,
+      });
       return {
         ads: response.data,
         total: response.total,
@@ -94,6 +101,29 @@ export const AdAPI = {
       }
 
       return { ads: [], error: error.message };
+    }
+  },
+
+  /**
+   * Retrieves a specific ad by its ID from the server.
+   * @param {string} id - The ID of the ad to retrieve.
+   * @param {boolean} [otherAds] - Specifies whether to include other ads or not.
+   * @returns {Promise<GetAdReturnData>} - The ad data if successfully retrieved, or an error message if something goes wrong.
+   */
+  getAd: async (id: string, otherAds?: boolean): Promise<GetAdReturnData> => {
+    try {
+      const response = await ApiGateway.get<GetAdItemResultData>(`/ad/${id}`, {
+        params: {
+          other: otherAds,
+        },
+      });
+      return { ad: response.data };
+    } catch (error: any) {
+      if (!error.message) {
+        return { error: "Erro de conexão com o servidor" };
+      }
+
+      return { error: error.message };
     }
   },
 };
