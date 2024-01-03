@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
  *
  * @returns {boolean} Returns true if the user is logged in, false otherwise.
  */
-export const isLogged = () => {
+export const isLogged = (): boolean => {
   let token = Cookies.get("token");
   return !!token;
 };

@@ -28,16 +28,14 @@ export const AuthController = {
       email: data.email,
     });
     if (!user) {
-      res.status(403).json({ error: "E-mail e/ou senha incorretos" });
+      res.status(403).json({ message: "E-mail e/ou senha incorretos" });
       return;
     }
 
     // Check if the password is correct.
     const match = await bcrypt.compare(data.password, user.passwordHash);
     if (!match) {
-      res.status(403).json({
-        error: { email: { msg: "E-mail e/ou senha incorretos" } },
-      });
+      res.status(403).json({ message: "E-mail e/ou senha incorretos" });
       return;
     }
 

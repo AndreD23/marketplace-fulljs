@@ -5,7 +5,7 @@ import {
   PageTitle,
 } from "../../components/MainComponents";
 import { useState } from "react";
-import { AuthAPI } from "../../apis/auth";
+import { AuthAPI } from "../../apis/AuthAPI";
 import { doLogin } from "../../helpers/AuthHandler";
 
 const SignIn = () => {
