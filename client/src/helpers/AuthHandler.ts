@@ -27,3 +27,13 @@ export const doLogin = (
     Cookies.set("token", token);
   }
 };
+
+/**
+ * Logs the user out by removing the token cookie and redirecting to the home page.
+ * @function
+ * @returns {void}
+ */
+export const doLogout = (): void => {
+  Cookies.remove("token");
+  window.location.href = "/";
+};

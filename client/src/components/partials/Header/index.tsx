@@ -1,15 +1,13 @@
 import { HeaderArea } from "./styled";
 import { Link } from "react-router-dom";
 
-import { isLogged } from "../../../helpers/AuthHandler";
-import Cookies from "js-cookie";
+import { doLogout, isLogged } from "../../../helpers/AuthHandler";
 
 const Header = () => {
   let logged = isLogged();
 
   const handleLogout = () => {
-    Cookies.remove("token");
-    window.location.href = "/";
+    doLogout();
   };
 
   return (
