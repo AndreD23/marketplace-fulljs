@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { AuthAPI } from "../../apis/AuthAPI";
 import { doLogin } from "../../helpers/AuthHandler";
 import { IState } from "../../types/state";
+import { AdAPI } from "../../apis/AdAPI";
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -21,7 +22,7 @@ const SignUp = () => {
   const [stateList, setStateList] = useState<IState[]>([]);
 
   const getStates = async () => {
-    const response = await AuthAPI.getStates();
+    const response = await AdAPI.getStates();
 
     if (response?.error) {
       alert(response.error);

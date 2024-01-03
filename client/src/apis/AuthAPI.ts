@@ -1,13 +1,7 @@
 import { ApiGateway } from "./ApiGateway";
-import { IState } from "../types/state";
 
 interface LoginReturnData {
   token: string;
-  error?: string;
-}
-
-interface StatesReturnData {
-  states: IState[];
   error?: string;
 }
 
@@ -28,24 +22,6 @@ export const AuthAPI = {
       }
 
       return { token: "", error: error.message };
-    }
-  },
-
-  /**
-   * Retrieves the list of states from the server.
-   *
-   * @async
-   * @returns {Promise<StatesReturnData>} A promise that resolves to an object containing the list of states and any error messages.
-   */
-  getStates: async (): Promise<StatesReturnData> => {
-    try {
-      return await ApiGateway.get("/states");
-    } catch (error: any) {
-      if (!error.message) {
-        return { states: [], error: "Erro de conexão com o servidor" };
-      }
-
-      return { states: [], error: error.message };
     }
   },
 

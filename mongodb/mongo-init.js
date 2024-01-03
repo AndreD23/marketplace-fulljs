@@ -168,7 +168,7 @@ db.categories.insertMany([
   },
   {
     "name":"Roupas",
-    "slug":"clouther"
+    "slug":"clothes"
   },
   {
     "name":"Eletrônicos",
