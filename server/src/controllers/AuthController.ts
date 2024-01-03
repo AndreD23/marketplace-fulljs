@@ -109,6 +109,7 @@ export const AuthController = {
         passwordHash,
         token,
         idState: data.idState,
+        status: true,
       });
     } catch (e) {
       res.status(400).json({
@@ -119,6 +120,6 @@ export const AuthController = {
       return;
     }
 
-    res.json({ token });
+    res.status(201).json({ token });
   },
 };
